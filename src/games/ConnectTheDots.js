@@ -4,7 +4,6 @@ import Timer from "../components/Timer";
 import Confetti from "../components/Confetti";
 import ScoreDisplay from "../components/ScoreDisplay";
 import {
-  scoreDots,
   submitScore,
   markGameCompleted,
   API_BASE_URL,
