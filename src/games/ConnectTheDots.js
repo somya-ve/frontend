@@ -219,6 +219,8 @@ const ConnectTheDots = () => {
 
   const progress = getUserProgress();
   const savedScore = progress.dots?.score || 0;
+  const solvedQuestions = progress.dots?.solvedQuestions || [];
+  const isCurrentlySolved = solvedQuestions.includes(currentChallenge) || gameStatus === "riddle";
 
   const fetchPatterns = async () => {
     try {
@@ -324,7 +326,7 @@ const ConnectTheDots = () => {
   }, [redrawLines, gridSize]);
 
   const handleDotClick = (coord) => {
-    if (gameStatus !== "drawing") return;
+    if (gameStatus !== "drawing" || isCurrentlySolved) return;
 
     if (selectedDots.includes(coord)) {
       const index = selectedDots.indexOf(coord);
@@ -382,22 +384,28 @@ const ConnectTheDots = () => {
         setTimerRunning(false);
         setShowConfetti(true);
 
-        const baseScore = scoreDots(attemptsCount, elapsedTime);
-        const score = Math.max(0, baseScore - (hintsRevealed * 50));
+        const attemptPenalty = Math.max(0, (attemptsCount - 1) * 25);
+        const timeBonus = Math.max(0, 100 - Math.floor(elapsedTime / 4));
+        const hintPenalty = hintsRevealed * 50;
+        const score = Math.max(0, 250 - attemptPenalty - hintPenalty + timeBonus);
+        
         setFinalScore(score);
-        markGameCompleted("dots");
+        markGameCompleted("dots"); // Doesn't hurt, but the real logic is in /api/dots/progress
 
         setFeedback({
-          text: "Pattern correct -- here is one part of the QR Code.",
+          text: "Pattern correct -- Question solved!",
           isError: false,
         });
 
+        const accumulatedScore = savedScore + score;
         saveProgress("dots", {
-          completed: true,
-          score,
+          score: accumulatedScore,
           attempts: attemptsCount + 1,
+          solvedQuestion: currentChallenge
         });
-        submitScore("dots", score, elapsedTime);
+        
+        // Use cumulative accumulated score for the leaderboard submission
+        submitScore("dots", accumulatedScore, elapsedTime);
       } else {
         setFeedback({
           text: `Incorrect pattern. Try again. (Attempt ${attemptsCount + 1})`,
@@ -454,7 +462,7 @@ const ConnectTheDots = () => {
               </div>
             ))}
             
-            {hintsRevealed < (patternsList[currentChallenge].hints?.length || 0) && gameStatus === "drawing" && (
+            {hintsRevealed < (patternsList[currentChallenge].hints?.length || 0) && gameStatus === "drawing" && !isCurrentlySolved && (
               <button 
                 className="btn btn--reset" 
                 onClick={() => setHintsRevealed(h => h + 1)}
@@ -500,7 +508,13 @@ const ConnectTheDots = () => {
 
       <SelectionTrail selectedDots={selectedDots} />
 
-      {gameStatus === "drawing" && (
+      {isCurrentlySolved && (
+        <div className="feedback-banner feedback-banner--success" style={{ marginTop: "16px" }}>
+          You have already solved this question. Great job!
+        </div>
+      )}
+
+      {!isCurrentlySolved && gameStatus === "drawing" && (
         <div className="controls">
           <button onClick={resetGame} className="btn btn--reset">
             Reset
