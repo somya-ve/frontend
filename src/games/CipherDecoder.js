@@ -48,7 +48,7 @@ const CipherDecoder = () => {
       console.error("Failed to fetch puzzles", err);
     }
   };
-
+// tyu
   useEffect(() => {
     fetchPuzzles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
