@@ -12,17 +12,7 @@ import {
   saveProgress,
   getUserProgress,
 } from "../utils/scoring";
-import side2 from "../images/Side2.png";
-import side3 from "../images/Side3.png";
-import side4 from "../images/Side4.png";
-import side5 from "../images/Side5.png";
 
-const SUCCESS_IMAGES = {
-  INFINITY: side5,
-  LIGHTNING_BOLT: side2,
-  S: side3,
-  M: side4,
-};
 
 // ────────────────────────────────────────────
 // Instructions Component
@@ -546,13 +536,7 @@ const ConnectTheDots = () => {
             You have solved the {patternsList?.[currentChallenge]?.displayName}{" "}
             challenge.
           </p>
-          <div className="success-card-image-wrapper">
-            <img
-              src={SUCCESS_IMAGES[currentChallenge]}
-              alt={`${patternsList?.[currentChallenge]?.displayName} QR fragment`}
-              className="success-card-image"
-            />
-          </div>
+
           <ScoreDisplay
             score={finalScore}
             visible={finalScore !== null}
