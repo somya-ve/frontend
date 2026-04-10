@@ -350,9 +350,7 @@ const WordScramble = () => {
               { label: "Streak Bonus", value: maxStreak * 30 },
             ]}
           />
-          <button className="btn btn--submit" onClick={resetGame} style={{ marginTop: "16px" }}>
-            Play Again
-          </button>
+
         </div>
       )}
 

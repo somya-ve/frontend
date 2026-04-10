@@ -245,9 +245,7 @@ const MemoryMatch = () => {
               { label: "Time Bonus", value: Math.max(0, 300 - Math.floor(elapsedTime)) },
             ]}
           />
-          <button className="btn btn--submit" onClick={resetGame} style={{ marginTop: "16px" }}>
-            Play Again
-          </button>
+
         </div>
       )}
 

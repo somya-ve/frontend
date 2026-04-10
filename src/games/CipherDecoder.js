@@ -269,9 +269,7 @@ const CipherDecoder = () => {
               { label: "Time Bonus", value: Math.max(0, 200 - Math.floor(elapsedTime / 3)) },
             ]}
           />
-          <button className="btn btn--submit" onClick={resetGame} style={{ marginTop: "16px" }}>
-            Play Again
-          </button>
+
         </div>
       )}
 

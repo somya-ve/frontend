@@ -146,7 +146,7 @@ const SecretPuzzle = () => {
           </li>
           <li>
             <span className="instruction-number">2</span>
-            <span>Clues may require you to physically explore the venue.</span>
+            <span>Clues will test your pop-culture, science, math, or general knowledge.</span>
           </li>
           <li>
             <span className="instruction-number">3</span>
