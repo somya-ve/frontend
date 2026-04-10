@@ -3,110 +3,131 @@ import { useNavigate } from "react-router-dom";
 import Timer from "../components/Timer";
 import Confetti from "../components/Confetti";
 import ScoreDisplay from "../components/ScoreDisplay";
-import PlayerNameModal from "../components/PlayerNameModal";
-import { scoreCipher, submitScore, markGameCompleted, API_BASE_URL } from "../utils/scoring";
+import {
+  scoreCipher,
+  submitScore,
+  markGameCompleted,
+  API_BASE_URL,
+  authFetch,
+  saveProgress,
+  getUserProgress,
+} from "../utils/scoring";
 
 const CipherDecoder = () => {
   const navigate = useNavigate();
-  const TOTAL_ROUNDS = 5;
 
   const [puzzles, setPuzzles] = useState([]);
   const [currentRound, setCurrentRound] = useState(0);
   const [userInput, setUserInput] = useState("");
   const [correctCount, setCorrectCount] = useState(0);
-  const [gameStatus, setGameStatus] = useState("playing"); // playing, finished
+  const [gameStatus, setGameStatus] = useState("playing");
   const [feedback, setFeedback] = useState(null);
   const [timerRunning, setTimerRunning] = useState(true);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [finalScore, setFinalScore] = useState(null);
-  const [showNameModal, setShowNameModal] = useState(false);
-  const [showHint, setShowHint] = useState(false);
   const [roundResults, setRoundResults] = useState([]);
+
+  const progress = getUserProgress();
+  const savedScore = progress.cipher?.score || 0;
+  const totalRounds = puzzles.length || 7;
 
   const fetchPuzzles = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/cipher?count=${TOTAL_ROUNDS}`, {
-        headers: { "ngrok-skip-browser-warning": "true" }
-      });
+      const res = await authFetch(`${API_BASE_URL}/api/cipher`);
       const data = await res.json();
       setPuzzles(data);
+
+      // Restore progress if any
+      const prog = getUserProgress();
+      if (prog.cipher && prog.cipher.currentRound > 0 && !prog.cipher.completed) {
+        setCurrentRound(prog.cipher.currentRound);
+        setCorrectCount(prog.cipher.correctCount || 0);
+      }
     } catch (err) {
       console.error("Failed to fetch puzzles", err);
     }
   };
 
-  // Initialize puzzles
   useEffect(() => {
     fetchPuzzles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const currentPuzzle = puzzles[currentRound];
   const encryptedText = currentPuzzle ? currentPuzzle.encrypted : "";
 
-  const handleSubmit = useCallback(async (e) => {
-    e.preventDefault();
-    if (!currentPuzzle || gameStatus !== "playing") return;
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      if (!currentPuzzle || gameStatus !== "playing") return;
 
-    const guess = userInput.trim().toUpperCase();
+      const guess = userInput.trim().toUpperCase();
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/cipher/verify`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "true"
-        },
-        body: JSON.stringify({ id: currentPuzzle.id, guess })
-      });
-      const data = await res.json();
-      const isCorrect = data.correct;
-
-      const result = {
-        encrypted: encryptedText,
-        answer: isCorrect ? data.answer : guess,
-        userAnswer: guess,
-        correct: isCorrect,
-      };
-
-      setRoundResults((prev) => [...prev, result]);
-
-      if (isCorrect) {
-        setCorrectCount((prev) => prev + 1);
-        setFeedback({ text: "Correct! Well decoded!", isError: false });
-      } else {
-        setFeedback({
-          text: `Wrong! The answer was: ${data.answer || "incorrect"}`,
-          isError: true,
+      try {
+        const res = await authFetch(`${API_BASE_URL}/api/cipher/verify`, {
+          method: "POST",
+          body: JSON.stringify({ id: currentPuzzle.id, guess }),
         });
-      }
+        const data = await res.json();
+        const isCorrect = data.correct;
 
-      // Move to next round after delay
-      setTimeout(() => {
-        setFeedback(null);
-        setUserInput("");
-        setShowHint(false);
+        const result = {
+          encrypted: encryptedText,
+          answer: isCorrect ? data.answer : guess,
+          userAnswer: guess,
+          correct: isCorrect,
+        };
 
-        if (currentRound + 1 >= TOTAL_ROUNDS) {
-          // Game over
-          setGameStatus("finished");
-          setTimerRunning(false);
-          const newCorrect = isCorrect ? correctCount + 1 : correctCount;
-          const score = scoreCipher(newCorrect, TOTAL_ROUNDS, elapsedTime);
-          setFinalScore(score);
-          if (newCorrect >= 3) {
-            setShowConfetti(true);
-            markGameCompleted("cipher");
-          }
-          setTimeout(() => setShowNameModal(true), 1500);
+        setRoundResults((prev) => [...prev, result]);
+
+        let newCorrect = correctCount;
+        if (isCorrect) {
+          newCorrect = correctCount + 1;
+          setCorrectCount(newCorrect);
+          setFeedback({ text: "Correct! Well decoded!", isError: false });
         } else {
-          setCurrentRound((prev) => prev + 1);
+          setFeedback({
+            text: `Wrong! The answer was: ${data.answer || "incorrect"}`,
+            isError: true,
+          });
         }
-      }, 2000);
-    } catch (err) {
-      console.error("Verification error", err);
-    }
-  }, [currentPuzzle, userInput, currentRound, correctCount, elapsedTime, encryptedText, gameStatus]);
+
+        setTimeout(() => {
+          setFeedback(null);
+          setUserInput("");
+
+          if (currentRound + 1 >= totalRounds) {
+            setGameStatus("finished");
+            setTimerRunning(false);
+            const score = scoreCipher(newCorrect, totalRounds, elapsedTime);
+            setFinalScore(score);
+            if (newCorrect >= 3) {
+              setShowConfetti(true);
+              markGameCompleted("cipher");
+            }
+            saveProgress("cipher", {
+              currentRound: currentRound + 1,
+              correctCount: newCorrect,
+              completed: true,
+              score,
+            });
+            submitScore("cipher", score, elapsedTime);
+          } else {
+            setCurrentRound((prev) => prev + 1);
+            saveProgress("cipher", {
+              currentRound: currentRound + 1,
+              correctCount: newCorrect,
+              completed: false,
+            });
+          }
+        }, 2000);
+      } catch (err) {
+        console.error("Verification error", err);
+      }
+    },
+    [currentPuzzle, userInput, currentRound, correctCount, elapsedTime, encryptedText, gameStatus, totalRounds]
+  );
 
   const resetGame = () => {
     fetchPuzzles();
@@ -119,13 +140,7 @@ const CipherDecoder = () => {
     setElapsedTime(0);
     setShowConfetti(false);
     setFinalScore(null);
-    setShowHint(false);
     setRoundResults([]);
-  };
-
-  const handleScoreSubmit = async (playerName) => {
-    setShowNameModal(false);
-    await submitScore(playerName, "cipher", finalScore, elapsedTime);
   };
 
   if (puzzles.length === 0) return null;
@@ -144,12 +159,16 @@ const CipherDecoder = () => {
         <span className="page-title-accent" />
       </div>
 
+      {/* Score + Stats */}
       <div className="game-header-row">
+        <div className="attempts-badge attempts-badge--score">
+          Best: {savedScore}
+        </div>
         <Timer running={timerRunning} onTick={setElapsedTime} mode="up" startFrom={0} />
         <div className="attempts-badge">
-          Round {Math.min(currentRound + 1, TOTAL_ROUNDS)}/{TOTAL_ROUNDS}
+          Round {Math.min(currentRound + 1, totalRounds)}/{totalRounds}
         </div>
-        <div className="attempts-badge attempts-badge--score">
+        <div className="attempts-badge">
           {correctCount} correct
         </div>
       </div>
@@ -158,27 +177,37 @@ const CipherDecoder = () => {
       <div className="progress-bar-wrapper">
         <div
           className="progress-bar-fill"
-          style={{ width: `${((currentRound) / TOTAL_ROUNDS) * 100}%` }}
+          style={{ width: `${(currentRound / totalRounds) * 100}%` }}
         />
+      </div>
+
+      {/* Rules */}
+      <div className="instructions-card">
+        <h2 className="instructions-card-header">Rules</h2>
+        <ol className="instructions-list">
+          <li>
+            <span className="instruction-number">1</span>
+            <span>Each message is encrypted using a Caesar cipher (letters shifted by N positions).</span>
+          </li>
+          <li>
+            <span className="instruction-number">2</span>
+            <span>The shift value is shown. Shift each letter BACKWARD by that amount to decode.</span>
+          </li>
+          <li>
+            <span className="instruction-number">3</span>
+            <span>Example: With shift 3, "D" becomes "A", "E" becomes "B", etc.</span>
+          </li>
+          <li>
+            <span className="instruction-number">4</span>
+            <span>Type the decoded message in ALL CAPS. Spaces and punctuation stay the same.</span>
+          </li>
+        </ol>
       </div>
 
       {gameStatus === "playing" && currentPuzzle && (
         <div className="cipher-card">
-          <div className="cipher-label">Encrypted Message:</div>
+          <div className="cipher-label">Encrypted Message (Shift: {currentPuzzle.shift}):</div>
           <div className="cipher-text">{encryptedText}</div>
-
-          <button
-            className="hint-btn"
-            onClick={() => setShowHint(!showHint)}
-          >
-            {showHint ? "Hide Hint" : "Show Hint"}
-          </button>
-
-          {showHint && (
-            <div className="cipher-hint">
-              Hint: {currentPuzzle.hint} | Shift: {currentPuzzle.shift}
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="cipher-form">
             <label className="cipher-input-label">Your Decoded Message:</label>
@@ -220,10 +249,9 @@ const CipherDecoder = () => {
             {correctCount >= 3 ? "Great Job!" : "Game Over"}
           </h2>
           <p className="success-card-subtitle">
-            You decoded {correctCount} out of {TOTAL_ROUNDS} messages.
+            You decoded {correctCount} out of {totalRounds} messages.
           </p>
 
-          {/* Round summary */}
           <div className="round-summary">
             {roundResults.map((r, i) => (
               <div key={i} className={`round-result ${r.correct ? "round-result--correct" : "round-result--wrong"}`}>
@@ -237,7 +265,7 @@ const CipherDecoder = () => {
             score={finalScore}
             visible={finalScore !== null}
             breakdown={[
-              { label: "Accuracy", value: Math.round(800 * (correctCount / TOTAL_ROUNDS)) },
+              { label: "Accuracy", value: Math.round(800 * (correctCount / totalRounds)) },
               { label: "Time Bonus", value: Math.max(0, 200 - Math.floor(elapsedTime / 3)) },
             ]}
           />
@@ -248,11 +276,6 @@ const CipherDecoder = () => {
       )}
 
       <Confetti active={showConfetti} />
-      <PlayerNameModal
-        visible={showNameModal}
-        onSubmit={handleScoreSubmit}
-        onClose={() => setShowNameModal(false)}
-      />
     </div>
   );
 };

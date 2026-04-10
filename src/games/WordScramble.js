@@ -3,12 +3,18 @@ import { useNavigate } from "react-router-dom";
 import Timer from "../components/Timer";
 import Confetti from "../components/Confetti";
 import ScoreDisplay from "../components/ScoreDisplay";
-import PlayerNameModal from "../components/PlayerNameModal";
-import { scoreScramble, submitScore, markGameCompleted, API_BASE_URL } from "../utils/scoring";
+import {
+  scoreScramble,
+  submitScore,
+  markGameCompleted,
+  API_BASE_URL,
+  authFetch,
+  saveProgress,
+  getUserProgress,
+} from "../utils/scoring";
 
 const WordScramble = () => {
   const navigate = useNavigate();
-  const TOTAL_WORDS = 8;
 
   const [words, setWords] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -22,18 +28,25 @@ const WordScramble = () => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [finalScore, setFinalScore] = useState(null);
-  const [showNameModal, setShowNameModal] = useState(false);
-  const [showHint, setShowHint] = useState(false);
   const [roundResults, setRoundResults] = useState([]);
   const [shakeInput, setShakeInput] = useState(false);
 
+  const progress = getUserProgress();
+  const savedScore = progress.scramble?.score || 0;
+  const totalWords = words.length || 10;
+
   const fetchWords = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/scramble?count=${TOTAL_WORDS}`, {
-        headers: { "ngrok-skip-browser-warning": "true" }
-      });
+      const res = await authFetch(`${API_BASE_URL}/api/scramble`);
       const data = await res.json();
       setWords(data);
+
+      // Restore progress
+      const prog = getUserProgress();
+      if (prog.scramble && prog.scramble.currentIndex > 0 && !prog.scramble.completed) {
+        setCurrentIndex(prog.scramble.currentIndex);
+        setCorrectCount(prog.scramble.correctCount || 0);
+      }
     } catch (err) {
       console.error("Failed to fetch words", err);
     }
@@ -41,6 +54,7 @@ const WordScramble = () => {
 
   useEffect(() => {
     fetchWords();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const currentWord = words[currentIndex];
@@ -51,18 +65,13 @@ const WordScramble = () => {
       if (!currentWord || gameStatus !== "playing") return;
 
       const guess = userInput.trim().toUpperCase();
-      
+
       try {
-        const res = await fetch(`${API_BASE_URL}/api/scramble/verify`, {
+        const res = await authFetch(`${API_BASE_URL}/api/scramble/verify`, {
           method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "true"
-          },
-          body: JSON.stringify({ id: currentWord.id, guess })
+          body: JSON.stringify({ id: currentWord.id, guess }),
         });
         const data = await res.json();
-        
         const isCorrect = data.correct;
 
         setRoundResults((prev) => [
@@ -99,42 +108,48 @@ const WordScramble = () => {
         setTimeout(() => {
           setFeedback(null);
           setUserInput("");
-          setShowHint(false);
 
-          if (currentIndex + 1 >= TOTAL_WORDS) {
+          if (currentIndex + 1 >= totalWords) {
             setGameStatus("finished");
             setTimerRunning(false);
             const bestStreak = Math.max(maxStreak, newStreak);
-            const score = scoreScramble(newCorrect, TOTAL_WORDS, elapsedTime, bestStreak);
+            const score = scoreScramble(newCorrect, totalWords, elapsedTime, bestStreak);
             setFinalScore(score);
             if (newCorrect >= 5) {
               setShowConfetti(true);
               markGameCompleted("scramble");
             }
-            setTimeout(() => setShowNameModal(true), 1500);
+            saveProgress("scramble", {
+              currentIndex: currentIndex + 1,
+              correctCount: newCorrect,
+              completed: true,
+              score,
+            });
+            submitScore("scramble", score, elapsedTime);
           } else {
             setCurrentIndex((prev) => prev + 1);
+            saveProgress("scramble", {
+              currentIndex: currentIndex + 1,
+              correctCount: newCorrect,
+              completed: false,
+            });
           }
         }, 1500);
       } catch (err) {
         console.error("Verification failed", err);
       }
     },
-    [currentWord, userInput, currentIndex, correctCount, streak, maxStreak, elapsedTime, gameStatus]
+    [currentWord, userInput, currentIndex, correctCount, streak, maxStreak, elapsedTime, gameStatus, totalWords]
   );
 
   const skipWord = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/scramble/skip`, {
+      const res = await authFetch(`${API_BASE_URL}/api/scramble/skip`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "true"
-        },
-        body: JSON.stringify({ id: currentWord.id })
+        body: JSON.stringify({ id: currentWord.id }),
       });
       const data = await res.json();
-      
+
       setRoundResults((prev) => [
         ...prev,
         {
@@ -146,20 +161,30 @@ const WordScramble = () => {
       ]);
       setStreak(0);
       setUserInput("");
-      setShowHint(false);
 
-      if (currentIndex + 1 >= TOTAL_WORDS) {
+      if (currentIndex + 1 >= totalWords) {
         setGameStatus("finished");
         setTimerRunning(false);
-        const score = scoreScramble(correctCount, TOTAL_WORDS, elapsedTime, maxStreak);
+        const score = scoreScramble(correctCount, totalWords, elapsedTime, maxStreak);
         setFinalScore(score);
         if (correctCount >= 5) {
           setShowConfetti(true);
           markGameCompleted("scramble");
         }
-        setTimeout(() => setShowNameModal(true), 1500);
+        saveProgress("scramble", {
+          currentIndex: currentIndex + 1,
+          correctCount,
+          completed: true,
+          score,
+        });
+        submitScore("scramble", score, elapsedTime);
       } else {
         setCurrentIndex((prev) => prev + 1);
+        saveProgress("scramble", {
+          currentIndex: currentIndex + 1,
+          correctCount,
+          completed: false,
+        });
       }
     } catch (err) {
       console.error(err);
@@ -179,13 +204,7 @@ const WordScramble = () => {
     setElapsedTime(0);
     setShowConfetti(false);
     setFinalScore(null);
-    setShowHint(false);
     setRoundResults([]);
-  };
-
-  const handleScoreSubmit = async (playerName) => {
-    setShowNameModal(false);
-    await submitScore(playerName, "scramble", finalScore, elapsedTime);
   };
 
   if (words.length === 0) return null;
@@ -204,10 +223,14 @@ const WordScramble = () => {
         <span className="page-title-accent" />
       </div>
 
+      {/* Score + Stats */}
       <div className="game-header-row">
+        <div className="attempts-badge attempts-badge--score">
+          Best: {savedScore}
+        </div>
         <Timer running={timerRunning} onTick={setElapsedTime} mode="up" startFrom={0} />
         <div className="attempts-badge">
-          {currentIndex + 1}/{TOTAL_WORDS}
+          {currentIndex + 1}/{totalWords}
         </div>
         {streak > 1 && (
           <div className="streak-badge">
@@ -220,8 +243,31 @@ const WordScramble = () => {
       <div className="progress-bar-wrapper">
         <div
           className="progress-bar-fill"
-          style={{ width: `${(currentIndex / TOTAL_WORDS) * 100}%` }}
+          style={{ width: `${(currentIndex / totalWords) * 100}%` }}
         />
+      </div>
+
+      {/* Rules */}
+      <div className="instructions-card">
+        <h2 className="instructions-card-header">Rules</h2>
+        <ol className="instructions-list">
+          <li>
+            <span className="instruction-number">1</span>
+            <span>The letters of a word have been jumbled. Rearrange them to find the original word.</span>
+          </li>
+          <li>
+            <span className="instruction-number">2</span>
+            <span>Example: "PLEAP" could be "APPLE".</span>
+          </li>
+          <li>
+            <span className="instruction-number">3</span>
+            <span>Type your answer in ALL CAPS and hit Submit.</span>
+          </li>
+          <li>
+            <span className="instruction-number">4</span>
+            <span>Build consecutive correct streaks for bonus points. Skipping resets the streak.</span>
+          </li>
+        </ol>
       </div>
 
       {gameStatus === "playing" && currentWord && (
@@ -234,19 +280,6 @@ const WordScramble = () => {
               </span>
             ))}
           </div>
-
-          <button
-            className="hint-btn"
-            onClick={() => setShowHint(!showHint)}
-          >
-            {showHint ? "Hide Hint" : "Show Hint"}
-          </button>
-
-          {showHint && (
-            <div className="cipher-hint">
-              Hint: {currentWord.hint}
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="cipher-form">
             <input
@@ -295,7 +328,7 @@ const WordScramble = () => {
             {correctCount >= 5 ? "Excellent!" : "Game Over"}
           </h2>
           <p className="success-card-subtitle">
-            You unscrambled {correctCount} out of {TOTAL_WORDS} words.
+            You unscrambled {correctCount} out of {totalWords} words.
             {maxStreak > 1 && ` Best streak: ${maxStreak}x`}
           </p>
 
@@ -312,7 +345,7 @@ const WordScramble = () => {
             score={finalScore}
             visible={finalScore !== null}
             breakdown={[
-              { label: "Accuracy", value: Math.round(500 * (correctCount / TOTAL_WORDS)) },
+              { label: "Accuracy", value: Math.round(500 * (correctCount / totalWords)) },
               { label: "Time Bonus", value: Math.max(0, 200 - Math.floor(elapsedTime / 2)) },
               { label: "Streak Bonus", value: maxStreak * 30 },
             ]}
@@ -324,11 +357,6 @@ const WordScramble = () => {
       )}
 
       <Confetti active={showConfetti} />
-      <PlayerNameModal
-        visible={showNameModal}
-        onSubmit={handleScoreSubmit}
-        onClose={() => setShowNameModal(false)}
-      />
     </div>
   );
 };

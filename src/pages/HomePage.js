@@ -1,6 +1,12 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCompletedGames } from "../utils/scoring";
+import {
+  getCompletedGames,
+  getPlayerName,
+  getTotalScore,
+  fetchUserInfo,
+  clearAuth,
+} from "../utils/scoring";
 
 const GAMES = [
   {
@@ -27,7 +33,7 @@ const GAMES = [
   {
     id: "cipher",
     title: "Cipher Decoder",
-    description: "Crack Caesar-cipher encrypted messages. Figure out the shift and decode the secret text.",
+    description: "Crack Caesar-cipher encrypted messages by shifting letters backward.",
     icon: (
       <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2">
         <rect x="6" y="10" width="36" height="28" rx="3" />
@@ -60,7 +66,7 @@ const GAMES = [
   {
     id: "scramble",
     title: "Word Scramble",
-    description: "Unscramble jumbled letters to reveal puzzle-themed words. Build streaks for bonus points.",
+    description: "Unscramble jumbled letters to reveal hidden words. Build streaks for bonus points.",
     icon: (
       <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2">
         <rect x="2" y="16" width="12" height="16" rx="2" />
@@ -77,12 +83,46 @@ const GAMES = [
     color: "#22c55e",
     difficulty: "Medium",
   },
+  {
+    id: "secret",
+    title: "Secret Puzzle",
+    description: "A chain of clues where each answer reveals the next. Explore the venue to solve them.",
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="24" cy="20" r="10" />
+        <path d="M24 16v4l3 3" strokeWidth="2.5" />
+        <rect x="20" y="34" width="8" height="6" rx="1" />
+        <path d="M22 40v4M26 40v4" />
+        <circle cx="24" cy="20" r="3" fill="currentColor" opacity="0.3" />
+      </svg>
+    ),
+    path: "/secret",
+    color: "#ef4444",
+    difficulty: "Expert",
+  },
 ];
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const completed = getCompletedGames();
+  const [completed, setCompleted] = useState([]);
+  const [totalScore, setTotalScore] = useState(0);
+  const [playerName, setPlayerNameLocal] = useState("");
+
+  useEffect(() => {
+    // Refresh user info from server
+    fetchUserInfo().then(() => {
+      setCompleted(getCompletedGames());
+      setTotalScore(getTotalScore());
+      setPlayerNameLocal(getPlayerName());
+    });
+  }, []);
+
   const progressPercent = (completed.length / GAMES.length) * 100;
+
+  const handleLogout = () => {
+    clearAuth();
+    navigate("/login");
+  };
 
   return (
     <div className="home-page" id="home-page">
@@ -93,6 +133,17 @@ const HomePage = () => {
           Solve puzzles, crack codes, and climb the leaderboard
         </p>
         <span className="page-title-accent" />
+      </div>
+
+      {/* User Info Bar */}
+      <div className="user-info-bar">
+        <div className="user-info-left">
+          <span className="user-info-name">Welcome, {playerName}</span>
+          <span className="user-info-score">Total Score: {totalScore}</span>
+        </div>
+        <button className="btn btn--reset user-logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
 
       {/* Overall Progress */}

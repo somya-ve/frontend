@@ -3,8 +3,13 @@ import { useNavigate } from "react-router-dom";
 import Timer from "../components/Timer";
 import Confetti from "../components/Confetti";
 import ScoreDisplay from "../components/ScoreDisplay";
-import PlayerNameModal from "../components/PlayerNameModal";
-import { scoreMemory, submitScore, markGameCompleted } from "../utils/scoring";
+import {
+  scoreMemory,
+  submitScore,
+  markGameCompleted,
+  saveProgress,
+  getUserProgress,
+} from "../utils/scoring";
 
 // Card symbols (cryptic/puzzle themed)
 const SYMBOLS = [
@@ -39,16 +44,18 @@ const MemoryMatch = () => {
   const navigate = useNavigate();
 
   const [cards, setCards] = useState([]);
-  const [flipped, setFlipped] = useState([]); // indexes currently face-up
-  const [matched, setMatched] = useState([]); // pairIds that have been matched
+  const [flipped, setFlipped] = useState([]);
+  const [matched, setMatched] = useState([]);
   const [moves, setMoves] = useState(0);
   const [gameStatus, setGameStatus] = useState("playing");
   const [timerRunning, setTimerRunning] = useState(true);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [finalScore, setFinalScore] = useState(null);
-  const [showNameModal, setShowNameModal] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+
+  const progress = getUserProgress();
+  const savedScore = progress.memory?.score || 0;
 
   // Initialize
   useEffect(() => {
@@ -66,14 +73,12 @@ const MemoryMatch = () => {
       const card2 = cards[second];
 
       if (card1.pairId === card2.pairId) {
-        // Match found
         setTimeout(() => {
           setMatched((prev) => [...prev, card1.pairId]);
           setFlipped([]);
           setIsChecking(false);
         }, 500);
       } else {
-        // No match - flip back
         setTimeout(() => {
           setFlipped([]);
           setIsChecking(false);
@@ -93,9 +98,11 @@ const MemoryMatch = () => {
       setFinalScore(score);
       markGameCompleted("memory");
 
-      setTimeout(() => setShowNameModal(true), 1500);
+      saveProgress("memory", { completed: true, score });
+      submitScore("memory", score, elapsedTime);
     }
-  }, [matched, moves, elapsedTime]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matched]);
 
   const handleCardClick = useCallback(
     (index) => {
@@ -122,11 +129,6 @@ const MemoryMatch = () => {
     setFinalScore(null);
   };
 
-  const handleScoreSubmit = async (playerName) => {
-    setShowNameModal(false);
-    await submitScore(playerName, "memory", finalScore, elapsedTime);
-  };
-
   const isCardFlipped = (index) =>
     flipped.includes(index) || matched.includes(cards[index]?.pairId);
 
@@ -144,12 +146,16 @@ const MemoryMatch = () => {
         <span className="page-title-accent" />
       </div>
 
+      {/* Score + Stats */}
       <div className="game-header-row">
+        <div className="attempts-badge attempts-badge--score">
+          Best: {savedScore}
+        </div>
         <Timer running={timerRunning} onTick={setElapsedTime} mode="up" startFrom={0} />
         <div className="attempts-badge">
           Moves: {moves}
         </div>
-        <div className="attempts-badge attempts-badge--score">
+        <div className="attempts-badge">
           {matched.length}/{SYMBOLS.length} pairs
         </div>
       </div>
@@ -160,6 +166,29 @@ const MemoryMatch = () => {
           className="progress-bar-fill"
           style={{ width: `${(matched.length / SYMBOLS.length) * 100}%` }}
         />
+      </div>
+
+      {/* Rules */}
+      <div className="instructions-card">
+        <h2 className="instructions-card-header">Rules</h2>
+        <ol className="instructions-list">
+          <li>
+            <span className="instruction-number">1</span>
+            <span>Click a card to flip it and reveal the symbol underneath.</span>
+          </li>
+          <li>
+            <span className="instruction-number">2</span>
+            <span>Flip two cards per turn. If they match, they stay revealed.</span>
+          </li>
+          <li>
+            <span className="instruction-number">3</span>
+            <span>If they don't match, they flip back. Try to remember where each symbol is.</span>
+          </li>
+          <li>
+            <span className="instruction-number">4</span>
+            <span>Match all 8 pairs. Fewer moves and faster time gives a higher score.</span>
+          </li>
+        </ol>
       </div>
 
       {/* Card Grid */}
@@ -223,11 +252,6 @@ const MemoryMatch = () => {
       )}
 
       <Confetti active={showConfetti} />
-      <PlayerNameModal
-        visible={showNameModal}
-        onSubmit={handleScoreSubmit}
-        onClose={() => setShowNameModal(false)}
-      />
     </div>
   );
 };

@@ -3,8 +3,15 @@ import { useNavigate } from "react-router-dom";
 import Timer from "../components/Timer";
 import Confetti from "../components/Confetti";
 import ScoreDisplay from "../components/ScoreDisplay";
-import PlayerNameModal from "../components/PlayerNameModal";
-import { scoreDots, submitScore, markGameCompleted, API_BASE_URL } from "../utils/scoring";
+import {
+  scoreDots,
+  submitScore,
+  markGameCompleted,
+  API_BASE_URL,
+  authFetch,
+  saveProgress,
+  getUserProgress,
+} from "../utils/scoring";
 import side2 from "../images/Side2.png";
 import side3 from "../images/Side3.png";
 import side4 from "../images/Side4.png";
@@ -22,22 +29,27 @@ const SUCCESS_IMAGES = {
 // ────────────────────────────────────────────
 const Instructions = () => (
   <div className="instructions-card">
-    <h2 className="instructions-card-header">How to Play</h2>
+    <h2 className="instructions-card-header">Rules</h2>
     <ol className="instructions-list">
       <li>
         <span className="instruction-number">1</span>
-        <span>Create your own pattern by connecting 6 dots on the grid.</span>
+        <span>Select a side/pattern from the buttons below.</span>
       </li>
       <li>
         <span className="instruction-number">2</span>
-        <span>Once you have selected 6 dots, submit your pattern to check.</span>
+        <span>Click exactly 6 dots on the grid to form the correct pattern.</span>
       </li>
       <li>
         <span className="instruction-number">3</span>
-        <span>
-          Coordinates for each pattern can be found on each side of the pillar
-          in LH.
-        </span>
+        <span>The coordinates for each pattern are hidden at the venue -- explore to find them.</span>
+      </li>
+      <li>
+        <span className="instruction-number">4</span>
+        <span>Grid uses rows A-J (top to bottom) and columns 1-10 (left to right). Example: "B3" means row B, column 3.</span>
+      </li>
+      <li>
+        <span className="instruction-number">5</span>
+        <span>Click a selected dot to deselect it. Click Reset to start over.</span>
       </li>
     </ol>
   </div>
@@ -141,7 +153,6 @@ const ColumnLabels = ({ cellSize }) => {
 const Grid = ({
   selectedDots,
   onDotClick,
-  currentChallenge,
   gridSize,
   cellSize,
   dotSize,
@@ -163,17 +174,13 @@ const Grid = ({
       {Array.from({ length: 10 }, (_, i) =>
         Array.from({ length: 10 }, (_, j) => {
           const coord = `${rows[i]}${j + 1}`;
-          // For the guessing phase, we don't know correctCoords immediately since backend returns it later.
-          // The line drawing just works as selection.
           const isSelected = selectedDots.includes(coord);
 
-          // Determine dot variant
           let dotClass = "dot-btn dot-btn--default";
           if (isSelected) {
-            dotClass = "dot-btn dot-btn--correct"; // Or just highlight as selected
+            dotClass = "dot-btn dot-btn--correct";
           }
 
-          // Calculate dot size based on cell size
           const actualDotSize = dotSize * 2;
 
           return (
@@ -204,11 +211,10 @@ const Grid = ({
 // ────────────────────────────────────────────
 const ConnectTheDots = () => {
   const navigate = useNavigate();
-  
-  // Game state
+
   const [selectedDots, setSelectedDots] = useState([]);
   const [currentChallenge, setCurrentChallenge] = useState("INFINITY");
-  const [gameStatus, setGameStatus] = useState("drawing"); // drawing, riddle, success
+  const [gameStatus, setGameStatus] = useState("drawing");
   const [feedback, setFeedback] = useState({ text: "", isError: false });
   const [attemptsCount, setAttemptsCount] = useState(0);
   const [gridSize, setGridSize] = useState({ width: 320, height: 320 });
@@ -218,14 +224,14 @@ const ConnectTheDots = () => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [finalScore, setFinalScore] = useState(null);
-  const [showNameModal, setShowNameModal] = useState(false);
   const [patternsList, setPatternsList] = useState(null);
+
+  const progress = getUserProgress();
+  const savedScore = progress.dots?.score || 0;
 
   const fetchPatterns = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/dots`, {
-        headers: { "ngrok-skip-browser-warning": "true" }
-      });
+      const res = await authFetch(`${API_BASE_URL}/api/dots`);
       const data = await res.json();
       setPatternsList(data);
     } catch (e) {
@@ -235,13 +241,13 @@ const ConnectTheDots = () => {
 
   useEffect(() => {
     fetchPatterns();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const canvasRef = useRef(null);
   const dotsRef = useRef({});
   const gridContainerRef = useRef(null);
 
-  // Calculate responsive grid size
   useEffect(() => {
     const updateGridSize = () => {
       if (gridContainerRef.current) {
@@ -260,7 +266,6 @@ const ConnectTheDots = () => {
     return () => window.removeEventListener("resize", updateGridSize);
   }, []);
 
-  // Initialize dots data
   useEffect(() => {
     const rows = "ABCDEFGHIJ";
     const dots = {};
@@ -280,7 +285,6 @@ const ConnectTheDots = () => {
     dotsRef.current = dots;
   }, [cellSize]);
 
-  // Drawing functions
   const clearLines = useCallback(() => {
     const canvas = canvasRef.current;
     if (canvas) {
@@ -319,12 +323,11 @@ const ConnectTheDots = () => {
       const dot2 = dotsRef.current[selectedDots[i + 1]];
 
       if (dot1 && dot2) {
-        drawLine(dot1.x, dot1.y, dot2.x, dot2.y, true); // True just for color visibility
+        drawLine(dot1.x, dot1.y, dot2.x, dot2.y, true);
       }
     }
   }, [clearLines, drawLine, selectedDots]);
 
-  // Redraw lines when selected dots change or when grid size changes
   useEffect(() => {
     redrawLines();
   }, [redrawLines, gridSize]);
@@ -375,13 +378,9 @@ const ConnectTheDots = () => {
     setAttemptsCount((prev) => prev + 1);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/dots/verify`, {
+      const res = await authFetch(`${API_BASE_URL}/api/dots/verify`, {
         method: "POST",
-        headers: { 
-          "Content-Type" : "application/json",
-          "ngrok-skip-browser-warning": "true"
-        },
-        body: JSON.stringify({ id: currentChallenge, selectedDots })
+        body: JSON.stringify({ id: currentChallenge, selectedDots }),
       });
       const data = await res.json();
       const isCorrect = data.correct;
@@ -400,8 +399,12 @@ const ConnectTheDots = () => {
           isError: false,
         });
 
-        // Show name modal after a short delay
-        setTimeout(() => setShowNameModal(true), 2000);
+        saveProgress("dots", {
+          completed: true,
+          score,
+          attempts: attemptsCount + 1,
+        });
+        submitScore("dots", score, elapsedTime);
       } else {
         setFeedback({
           text: `Incorrect pattern. Try again. (Attempt ${attemptsCount + 1})`,
@@ -411,11 +414,6 @@ const ConnectTheDots = () => {
     } catch (e) {
       console.error(e);
     }
-  };
-
-  const handleScoreSubmit = async (playerName) => {
-    setShowNameModal(false);
-    await submitScore(playerName, "dots", finalScore, elapsedTime);
   };
 
   return (
@@ -433,6 +431,9 @@ const ConnectTheDots = () => {
       </div>
 
       <div className="game-header-row">
+        <div className="attempts-badge attempts-badge--score">
+          Best: {savedScore}
+        </div>
         <Timer running={timerRunning} onTick={setElapsedTime} mode="up" startFrom={0} />
         <div className="attempts-badge">
           Attempts: {attemptsCount}
@@ -470,7 +471,6 @@ const ConnectTheDots = () => {
             <Grid
               selectedDots={selectedDots}
               onDotClick={handleDotClick}
-              currentChallenge={currentChallenge}
               gridSize={gridSize}
               cellSize={cellSize}
               dotSize={dotSize}
@@ -540,11 +540,6 @@ const ConnectTheDots = () => {
       )}
 
       <Confetti active={showConfetti} />
-      <PlayerNameModal
-        visible={showNameModal}
-        onSubmit={handleScoreSubmit}
-        onClose={() => setShowNameModal(false)}
-      />
     </div>
   );
 };

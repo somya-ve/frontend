@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { API_BASE_URL } from "../utils/scoring";
+import { API_BASE_URL, authFetch } from "../utils/scoring";
 
 const GAME_LABELS = {
   dots: "Connect the Dots",
   cipher: "Cipher Decoder",
   memory: "Memory Match",
   scramble: "Word Scramble",
+  secret: "Secret Puzzle",
 };
 
 const Leaderboard = () => {
@@ -34,9 +35,7 @@ const Leaderboard = () => {
           filter === "all"
             ? `${API_BASE_URL}/api/leaderboard`
             : `${API_BASE_URL}/api/leaderboard/${filter}`;
-        const res = await fetch(url, {
-          headers: { "ngrok-skip-browser-warning": "true" }
-        });
+        const res = await authFetch(url);
         if (res.ok) {
           const data = await res.json();
           setScores(data);

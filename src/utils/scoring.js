@@ -5,6 +5,7 @@ const BASE_POINTS = {
   cipher: 800,
   memory: 600,
   scramble: 500,
+  secret: 1000,
 };
 
 /**
@@ -97,26 +98,111 @@ export function savePlayerName(name) {
 
 export const API_BASE_URL = process.env.REACT_APP_API_URL || import.meta.env?.VITE_API_URL || "https://outbreak-certified-carefully.ngrok-free.dev";
 
+// ─── Auth Helpers ───
+
+export function getAuthToken() {
+  return localStorage.getItem("cryptic_auth_token") || "";
+}
+
+export function setAuthToken(token) {
+  localStorage.setItem("cryptic_auth_token", token);
+}
+
+export function clearAuth() {
+  localStorage.removeItem("cryptic_auth_token");
+  localStorage.removeItem("cryptic_player_name");
+  localStorage.removeItem("cryptic_completed");
+  localStorage.removeItem("cryptic_user_progress");
+}
+
+export function isLoggedIn() {
+  return !!getAuthToken();
+}
+
+export function getUserProgress() {
+  try {
+    return JSON.parse(localStorage.getItem("cryptic_user_progress") || "{}");
+  } catch {
+    return {};
+  }
+}
+
+export function setUserProgress(progress) {
+  localStorage.setItem("cryptic_user_progress", JSON.stringify(progress));
+}
+
+export function getTotalScore() {
+  const progress = getUserProgress();
+  return ["dots", "cipher", "memory", "scramble", "secret"].reduce(
+    (sum, g) => sum + (progress[g]?.score || 0),
+    0
+  );
+}
+
+/**
+ * Authenticated fetch helper
+ */
+export function authFetch(url, options = {}) {
+  const token = getAuthToken();
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true",
+      ...(token ? { "x-auth-token": token } : {}),
+    },
+  });
+}
+
 /**
  * Submit score to backend
  */
-export async function submitScore(playerName, game, score, time) {
+export async function submitScore(game, score, time) {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/leaderboard`, {
+    const res = await authFetch(`${API_BASE_URL}/api/leaderboard`, {
       method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true"
-      },
-      body: JSON.stringify({ playerName, game, score, time }),
+      body: JSON.stringify({ game, score, time }),
     });
     return await res.json();
   } catch (err) {
     console.warn("Could not submit score:", err);
-    // Save locally as fallback
     const local = JSON.parse(localStorage.getItem("cryptic_scores") || "[]");
+    const playerName = getPlayerName();
     local.push({ playerName, game, score, time, date: new Date().toISOString() });
     localStorage.setItem("cryptic_scores", JSON.stringify(local));
+    return null;
+  }
+}
+
+/**
+ * Save game progress to server
+ */
+export async function saveProgress(game, progressData) {
+  try {
+    await authFetch(`${API_BASE_URL}/api/${game}/progress`, {
+      method: "POST",
+      body: JSON.stringify(progressData),
+    });
+  } catch (err) {
+    console.warn("Could not save progress:", err);
+  }
+}
+
+/**
+ * Fetch user info from server
+ */
+export async function fetchUserInfo() {
+  try {
+    const res = await authFetch(`${API_BASE_URL}/api/auth/me`);
+    if (res.ok) {
+      const data = await res.json();
+      savePlayerName(data.username);
+      setUserProgress(data.progress);
+      return data;
+    }
+    return null;
+  } catch {
     return null;
   }
 }
