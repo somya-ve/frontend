@@ -41,11 +41,11 @@ const Instructions = () => (
       </li>
       <li>
         <span className="instruction-number">3</span>
-        <span>The coordinates for each pattern are hidden at the venue -- explore to find them.</span>
+        <span>Solve the riddle to identify the starting coordinate. You can reveal hints that guide you to the remaining dots.</span>
       </li>
       <li>
         <span className="instruction-number">4</span>
-        <span>Grid uses rows A-J (top to bottom) and columns 1-10 (left to right). Example: "B3" means row B, column 3.</span>
+        <span>Grid uses rows A-J (top to bottom) and columns 1-10 (left to right). Example: "B3" means row B, column 3. Revealing hints costs 50 points each.</span>
       </li>
       <li>
         <span className="instruction-number">5</span>
@@ -225,6 +225,7 @@ const ConnectTheDots = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [finalScore, setFinalScore] = useState(null);
   const [patternsList, setPatternsList] = useState(null);
+  const [hintsRevealed, setHintsRevealed] = useState(0);
 
   const progress = getUserProgress();
   const savedScore = progress.dots?.score || 0;
@@ -362,6 +363,7 @@ const ConnectTheDots = () => {
 
   const handleSelectChallenge = (challengeKey) => {
     setCurrentChallenge(challengeKey);
+    setHintsRevealed(0);
     resetGame();
   };
 
@@ -390,7 +392,8 @@ const ConnectTheDots = () => {
         setTimerRunning(false);
         setShowConfetti(true);
 
-        const score = scoreDots(attemptsCount, elapsedTime);
+        const baseScore = scoreDots(attemptsCount, elapsedTime);
+        const score = Math.max(0, baseScore - (hintsRevealed * 50));
         setFinalScore(score);
         markGameCompleted("dots");
 
@@ -447,6 +450,32 @@ const ConnectTheDots = () => {
         currentChallenge={currentChallenge}
         patternsList={patternsList}
       />
+
+      {patternsList && patternsList[currentChallenge] && (
+        <div className="secret-puzzle-card" style={{ marginBottom: "20px" }}>
+          <div className="secret-clue-text" style={{ fontSize: "1.1rem", marginBottom: "16px" }}>
+            <strong>Question: </strong>{patternsList[currentChallenge].riddleText}
+          </div>
+          
+          <div className="hints-section" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {patternsList[currentChallenge].hints?.slice(0, hintsRevealed).map((hint, i) => (
+              <div key={i} className="hint-banner" style={{ background: "rgba(249, 115, 22, 0.1)", border: "1px solid rgba(249, 115, 22, 0.3)", padding: "10px", borderRadius: "8px", color: "var(--color-orange-400)" }}>
+                <strong>Hint {i + 1}:</strong> {hint}
+              </div>
+            ))}
+            
+            {hintsRevealed < (patternsList[currentChallenge].hints?.length || 0) && gameStatus === "drawing" && (
+              <button 
+                className="btn btn--reset" 
+                onClick={() => setHintsRevealed(h => h + 1)}
+                style={{ alignSelf: "flex-start", marginTop: "8px" }}
+              >
+                Reveal Hint (-50 pts)
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       <div ref={gridContainerRef} className="grid-wrapper">
         <div className="grid-frame">
@@ -531,6 +560,7 @@ const ConnectTheDots = () => {
               { label: "Base Score", value: 1000 },
               { label: "Attempt Penalty", value: -Math.max(0, (attemptsCount - 1) * 150) },
               { label: "Time Bonus", value: Math.max(0, 300 - Math.floor(elapsedTime / 2)) },
+              { label: "Hint Penalty", value: -(hintsRevealed * 50) },
             ]}
           />
 
