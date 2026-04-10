@@ -179,14 +179,10 @@ const CipherDecoder = () => {
           </li>
           <li>
             <span className="instruction-number">2</span>
-            <span>The shift value is shown. Shift each letter BACKWARD by that amount to decode.</span>
-          </li>
-          <li>
-            <span className="instruction-number">3</span>
             <span>Example: With shift 3, "D" becomes "A", "E" becomes "B", etc.</span>
           </li>
           <li>
-            <span className="instruction-number">4</span>
+            <span className="instruction-number">3</span>
             <span>Type the decoded message in ALL CAPS. Spaces and punctuation stay the same.</span>
           </li>
         </ol>
@@ -194,7 +190,7 @@ const CipherDecoder = () => {
 
       {gameStatus === "playing" && currentPuzzle && (
         <div className="cipher-card">
-          <div className="cipher-label">Encrypted Message (Shift: {currentPuzzle.shift}):</div>
+          <div className="cipher-label">Encrypted Message:</div>
           <div className="cipher-text">{encryptedText}</div>
 
           <form onSubmit={handleSubmit} className="cipher-form">

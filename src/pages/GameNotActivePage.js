@@ -14,9 +14,9 @@ const GameNotActivePage = ({ children }) => {
         setIsActive(data.isGameActive === true);
         setMessage(data.activeMessage || "The game is currently not active.");
       } catch {
-        // If backend is unreachable, block access for safety
-        setIsActive(false);
-        setMessage("The Cryptic Hunt is active from 2:00 PM to 7:00 PM only. Come back during the event window!");
+        // If backend is unreachable, don't show the not active screen. 
+        // This prevents the app from being permanently locked if the connection/tunnel drops.
+        setIsActive(true);
       }
     };
 
