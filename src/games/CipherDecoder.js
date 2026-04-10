@@ -129,19 +129,7 @@ const CipherDecoder = () => {
     [currentPuzzle, userInput, currentRound, correctCount, elapsedTime, encryptedText, gameStatus, totalRounds]
   );
 
-  const resetGame = () => {
-    fetchPuzzles();
-    setCurrentRound(0);
-    setUserInput("");
-    setCorrectCount(0);
-    setGameStatus("playing");
-    setFeedback(null);
-    setTimerRunning(true);
-    setElapsedTime(0);
-    setShowConfetti(false);
-    setFinalScore(null);
-    setRoundResults([]);
-  };
+
 
   if (puzzles.length === 0) return null;
 

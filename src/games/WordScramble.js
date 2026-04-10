@@ -191,22 +191,6 @@ const WordScramble = () => {
     }
   };
 
-  const resetGame = () => {
-    fetchWords();
-    setCurrentIndex(0);
-    setUserInput("");
-    setCorrectCount(0);
-    setStreak(0);
-    setMaxStreak(0);
-    setGameStatus("playing");
-    setFeedback(null);
-    setTimerRunning(true);
-    setElapsedTime(0);
-    setShowConfetti(false);
-    setFinalScore(null);
-    setRoundResults([]);
-  };
-
   if (words.length === 0) return null;
 
   return (
