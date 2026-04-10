@@ -5,6 +5,7 @@ import BrandBar from "./components/BrandBar";
 import NavBar from "./components/NavBar";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
+import GameNotActivePage from "./pages/GameNotActivePage";
 import ConnectTheDots from "./games/ConnectTheDots";
 import CipherDecoder from "./games/CipherDecoder";
 import MemoryMatch from "./games/MemoryMatch";
@@ -54,7 +55,9 @@ const AppContent = () => {
 const App = () => {
   return (
     <Router>
-      <AppContent />
+      <GameNotActivePage>
+        <AppContent />
+      </GameNotActivePage>
     </Router>
   );
 };

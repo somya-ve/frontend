@@ -209,17 +209,39 @@ const ConnectTheDots = () => {
   const [gridSize, setGridSize] = useState({ width: 320, height: 320 });
   const [dotSize, setDotSize] = useState(6);
   const [cellSize, setCellSize] = useState(32);
-  const [timerRunning, setTimerRunning] = useState(true);
+  const [timerRunning, setTimerRunning] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [timerKey, setTimerKey] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [finalScore, setFinalScore] = useState(null);
   const [patternsList, setPatternsList] = useState(null);
   const [hintsRevealed, setHintsRevealed] = useState(0);
+  const [liveScore, setLiveScore] = useState(0);
+  const questionStateRef = useRef({});
 
   const progress = getUserProgress();
   const savedScore = progress.dots?.score || 0;
   const solvedQuestions = progress.dots?.solvedQuestions || [];
+  const savedQuestionState = progress.dots?.questionState || {};
   const isCurrentlySolved = solvedQuestions.includes(currentChallenge) || gameStatus === "riddle";
+
+  // Initialize liveScore and questionState from saved progress on mount
+  useEffect(() => {
+    setLiveScore(savedScore);
+    questionStateRef.current = { ...savedQuestionState };
+    // Restore state for first question (INFINITY)
+    const initState = savedQuestionState["INFINITY"];
+    if (initState) {
+      setHintsRevealed(initState.hints || 0);
+      setAttemptsCount(initState.attempts || 0);
+      setElapsedTime(initState.timer || 0);
+      setTimerKey(k => k + 1);
+    }
+    if (!solvedQuestions.includes("INFINITY")) {
+      setTimerRunning(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchPatterns = async () => {
     try {
@@ -345,17 +367,52 @@ const ConnectTheDots = () => {
     setSelectedDots([]);
     setGameStatus("drawing");
     setFeedback({ text: "", isError: false });
-    setTimerRunning(true);
-    setElapsedTime(0);
     setShowConfetti(false);
     setFinalScore(null);
     clearLines();
   };
 
+  // Save current question's timer/hints/attempts before switching
+  const saveCurrentQuestionState = useCallback(() => {
+    questionStateRef.current[currentChallenge] = {
+      timer: elapsedTime,
+      hints: hintsRevealed,
+      attempts: attemptsCount,
+    };
+    // Persist to backend
+    saveProgress("dots", {
+      score: liveScore,
+      questionState: { [currentChallenge]: questionStateRef.current[currentChallenge] }
+    });
+  }, [currentChallenge, elapsedTime, hintsRevealed, attemptsCount, liveScore]);
+
   const handleSelectChallenge = (challengeKey) => {
+    // Save state of current question
+    saveCurrentQuestionState();
+
+    // Switch to new question
     setCurrentChallenge(challengeKey);
-    setHintsRevealed(0);
     resetGame();
+
+    // Restore saved state for the new question
+    const saved = questionStateRef.current[challengeKey];
+    if (saved) {
+      setHintsRevealed(saved.hints || 0);
+      setAttemptsCount(saved.attempts || 0);
+      setElapsedTime(saved.timer || 0);
+    } else {
+      setHintsRevealed(0);
+      setAttemptsCount(0);
+      setElapsedTime(0);
+    }
+    setTimerKey(k => k + 1);
+
+    // Only start timer if question is not already solved
+    if (!solvedQuestions.includes(challengeKey)) {
+      setTimerRunning(true);
+    } else {
+      setTimerRunning(false);
+    }
   };
 
   const checkPattern = async () => {
@@ -385,26 +442,30 @@ const ConnectTheDots = () => {
 
         const attemptPenalty = Math.max(0, (attemptsCount - 1) * 25);
         const timeBonus = Math.max(0, 100 - Math.floor(elapsedTime / 4));
-        const hintPenalty = hintsRevealed * 50;
-        const score = Math.max(0, 250 - attemptPenalty - hintPenalty + timeBonus);
+        // Hint penalty already deducted from liveScore, so just calc base + time - attempts
+        const questionScore = Math.max(0, 250 - attemptPenalty + timeBonus - (hintsRevealed * 50));
         
-        setFinalScore(score);
-        markGameCompleted("dots"); // Doesn't hurt, but the real logic is in /api/dots/progress
+        // The score to add is questionScore (hints already deducted from liveScore,
+        // so we add back the base amount minus hint cost)
+        const accumulatedScore = liveScore + 250 - (hintsRevealed * 50) + timeBonus - attemptPenalty;
+        const finalAccumulated = Math.max(0, accumulatedScore);
+
+        setFinalScore(questionScore);
+        setLiveScore(finalAccumulated);
+        markGameCompleted("dots");
 
         setFeedback({
           text: "Pattern correct -- Question solved!",
           isError: false,
         });
 
-        const accumulatedScore = savedScore + score;
         saveProgress("dots", {
-          score: accumulatedScore,
+          score: finalAccumulated,
           attempts: attemptsCount + 1,
           solvedQuestion: currentChallenge
         });
         
-        // Use cumulative accumulated score for the leaderboard submission
-        submitScore("dots", accumulatedScore, elapsedTime);
+        submitScore("dots", finalAccumulated, elapsedTime);
       } else {
         setFeedback({
           text: `Incorrect pattern. Try again. (Attempt ${attemptsCount + 1})`,
@@ -432,9 +493,9 @@ const ConnectTheDots = () => {
 
       <div className="game-header-row">
         <div className="attempts-badge attempts-badge--score">
-          Best: {savedScore}
+          Score: {liveScore}
         </div>
-        <Timer running={timerRunning} onTick={setElapsedTime} mode="up" startFrom={0} />
+        <Timer key={timerKey} running={timerRunning} onTick={setElapsedTime} mode="up" startFrom={elapsedTime} />
         <div className="attempts-badge">
           Attempts: {attemptsCount}
         </div>
@@ -464,7 +525,21 @@ const ConnectTheDots = () => {
             {hintsRevealed < (patternsList[currentChallenge].hints?.length || 0) && gameStatus === "drawing" && !isCurrentlySolved && (
               <button 
                 className="btn btn--reset" 
-                onClick={() => setHintsRevealed(h => h + 1)}
+                onClick={() => {
+                  setHintsRevealed(h => h + 1);
+                  const newScore = Math.max(0, liveScore - 50);
+                  setLiveScore(newScore);
+                  // Immediately persist the deduction
+                  saveProgress("dots", {
+                    score: newScore,
+                    questionState: { [currentChallenge]: {
+                      timer: elapsedTime,
+                      hints: hintsRevealed + 1,
+                      attempts: attemptsCount,
+                    }}
+                  });
+                  submitScore("dots", newScore, elapsedTime);
+                }}
                 style={{ alignSelf: "flex-start", marginTop: "8px" }}
               >
                 Reveal Hint (-50 pts)
