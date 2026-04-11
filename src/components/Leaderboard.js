@@ -21,7 +21,7 @@ const Leaderboard = () => {
         currentFilter === "all"
           ? local
           : local.filter((s) => s.game === currentFilter);
-      setScores(filtered.sort((a, b) => b.score - a.score).slice(0, 50));
+      setScores(filtered.sort((a, b) => b.score - a.score).slice(0, 200));
     } catch {
       setScores([]);
     }
