@@ -9,6 +9,63 @@ const GAME_LABELS = {
   secret: "Secret Puzzle",
 };
 
+// ─── Winner Banner ─────────────────────────────────────────────────────────
+const WinnerBanner = () => {
+  const [winner, setWinner] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWinner = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/winner`);
+        if (res.ok) {
+          const data = await res.json();
+          setWinner(data);
+        }
+      } catch {
+        /* silently skip if backend unavailable */
+      }
+      setLoading(false);
+    };
+    fetchWinner();
+  }, []);
+
+  if (loading) return null;
+  if (!winner) return null;
+
+  return (
+    <div className="winner-banner" id="winner-banner">
+      {/* Animated sparkles */}
+      <div className="winner-sparkle winner-sparkle--1" aria-hidden="true" />
+      <div className="winner-sparkle winner-sparkle--2" aria-hidden="true" />
+      <div className="winner-sparkle winner-sparkle--3" aria-hidden="true" />
+
+      <div className="winner-crown" aria-label="Crown">👑</div>
+
+      <div className="winner-label">Cryptic Hunt Champion</div>
+
+      <div className="winner-name">{winner.username}</div>
+
+      <div className="winner-meta">
+        <span className="winner-email">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="m2 7 10 7 10-7" />
+          </svg>
+          {winner.email}
+        </span>
+        <span className="winner-score-pill">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+          {winner.score.toLocaleString()} pts
+        </span>
+      </div>
+    </div>
+  );
+};
+
+// ─── Main Leaderboard ───────────────────────────────────────────────────────
 const Leaderboard = () => {
   const [scores, setScores] = useState([]);
   const [filter, setFilter] = useState("all");
@@ -71,6 +128,9 @@ const Leaderboard = () => {
         <h1>Leaderboard</h1>
         <span className="page-title-accent" />
       </div>
+
+      {/* Winner Banner */}
+      <WinnerBanner />
 
       {/* Filter Tabs */}
       <div className="leaderboard-filters">

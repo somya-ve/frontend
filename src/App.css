@@ -1399,6 +1399,192 @@
   animation: fadeIn 0.3s ease both;
 }
 
+/* ===== WINNER BANNER ===== */
+.winner-banner {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 24px;
+  padding: 28px 20px 24px;
+  background: linear-gradient(135deg,
+    rgba(251, 191, 36, 0.12) 0%,
+    rgba(249, 115, 22, 0.10) 50%,
+    rgba(251, 191, 36, 0.08) 100%);
+  border: 1.5px solid rgba(251, 191, 36, 0.5);
+  border-radius: var(--radius-xl);
+  text-align: center;
+  animation: fadeInUp 0.6s ease both;
+  box-shadow:
+    0 0 40px rgba(251, 191, 36, 0.12),
+    0 0 80px rgba(249, 115, 22, 0.07),
+    inset 0 1px 0 rgba(251, 191, 36, 0.2);
+}
+
+/* Animated top shimmer bar */
+.winner-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent,
+    var(--color-amber-400),
+    var(--color-orange-400),
+    var(--color-amber-300),
+    transparent);
+  background-size: 300% 100%;
+  animation: shimmer 2.5s linear infinite;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+/* Subtle sweep overlay */
+.winner-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 70% 50% at 50% 0%,
+    rgba(251, 191, 36, 0.08) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+/* Sparkle dots */
+.winner-sparkle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: sparklePulse 2.4s ease-in-out infinite;
+}
+
+.winner-sparkle--1 {
+  width: 6px;
+  height: 6px;
+  background: var(--color-amber-400);
+  top: 18px;
+  left: 22px;
+  opacity: 0.7;
+  animation-delay: 0s;
+}
+
+.winner-sparkle--2 {
+  width: 4px;
+  height: 4px;
+  background: var(--color-orange-400);
+  top: 28px;
+  right: 30px;
+  opacity: 0.6;
+  animation-delay: 0.8s;
+}
+
+.winner-sparkle--3 {
+  width: 5px;
+  height: 5px;
+  background: var(--color-amber-300);
+  bottom: 20px;
+  left: 50%;
+  opacity: 0.5;
+  animation-delay: 1.6s;
+}
+
+@keyframes sparklePulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50%       { transform: scale(1.8); opacity: 1; }
+}
+
+.winner-crown {
+  font-size: 2.4rem;
+  margin-bottom: 6px;
+  display: block;
+  animation: crownBounce 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.6));
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes crownBounce {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%       { transform: translateY(-5px) rotate(3deg); }
+}
+
+.winner-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: var(--color-amber-400);
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.winner-name {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--color-amber-300), var(--color-orange-400), var(--color-amber-400));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.winner-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.winner-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  color: var(--color-gray-300);
+  letter-spacing: 0.3px;
+}
+
+.winner-email svg {
+  color: var(--color-amber-400);
+  flex-shrink: 0;
+}
+
+.winner-score-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 14px;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(251, 191, 36, 0.25));
+  border: 1px solid rgba(249, 115, 22, 0.5);
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--color-amber-300);
+  box-shadow: 0 0 12px rgba(249, 115, 22, 0.2);
+}
+
+.winner-score-pill svg {
+  color: var(--color-orange-400);
+  flex-shrink: 0;
+}
+
+/* ===== LEADERBOARD PAGE ===== */
 .leaderboard-filters {
   display: flex;
   gap: 6px;
