@@ -1,0 +1,663 @@
+{
+  "winner": {
+    "username": "Himani",
+    "email": "25bee046@nith.ac.in",
+    "score": 3886
+  },
+  "leaderboard": [
+    {
+      "id": "mnsvirwpvku3t",
+      "playerName": "Himani",
+      "game": "Total Combined Score",
+      "score": 3886
+    },
+    {
+      "id": "mnsxm3i0x6evz",
+      "playerName": "Vijay",
+      "game": "Total Combined Score",
+      "score": 3817
+    },
+    {
+      "id": "mnsxhlkpl3dvt",
+      "playerName": "Varsha",
+      "game": "Total Combined Score",
+      "score": 3675
+    },
+    {
+      "id": "mnsz5nuistxlw",
+      "playerName": "Senya19",
+      "game": "Total Combined Score",
+      "score": 3544
+    },
+    {
+      "id": "mntz3uhq9585c",
+      "playerName": "Kuldeep Bhakar",
+      "game": "Total Combined Score",
+      "score": 3153
+    },
+    {
+      "id": "mnswsfk1krm47",
+      "playerName": "Priyanka",
+      "game": "Total Combined Score",
+      "score": 3073
+    },
+    {
+      "id": "mnty26ae7d5h9",
+      "playerName": "Ramphal",
+      "game": "Total Combined Score",
+      "score": 2931
+    },
+    {
+      "id": "mnuba7rfsd9mj",
+      "playerName": "Abhishek",
+      "game": "Total Combined Score",
+      "score": 2612
+    },
+    {
+      "id": "mntz3rsmh0tkl",
+      "playerName": "Bhalu",
+      "game": "Total Combined Score",
+      "score": 2481
+    },
+    {
+      "id": "mnsyb6c529vzd",
+      "playerName": "Satuti",
+      "game": "Total Combined Score",
+      "score": 2372
+    },
+    {
+      "id": "mnty6855wx4b1",
+      "playerName": "Heil Hitler",
+      "game": "Total Combined Score",
+      "score": 2285
+    },
+    {
+      "id": "mnt317e01p4i9",
+      "playerName": "Ishiii",
+      "game": "Total Combined Score",
+      "score": 2265
+    },
+    {
+      "id": "mnsuz2vklwjmo",
+      "playerName": "Somya",
+      "game": "Total Combined Score",
+      "score": 903
+    },
+    {
+      "id": "mntydhmbn3df2",
+      "playerName": "Kushagra",
+      "game": "Total Combined Score",
+      "score": 740
+    },
+    {
+      "id": "mnsvhmrx8v287",
+      "playerName": "Himanshu",
+      "game": "Total Combined Score",
+      "score": 705
+    },
+    {
+      "id": "mnudk2frm99mt",
+      "playerName": "Shivanshu",
+      "game": "Total Combined Score",
+      "score": 704
+    },
+    {
+      "id": "mntxx1f235m1i",
+      "playerName": "Arzaan",
+      "game": "Total Combined Score",
+      "score": 595
+    },
+    {
+      "id": "mnt116olb8mxj",
+      "playerName": "Chetan",
+      "game": "Total Combined Score",
+      "score": 535
+    },
+    {
+      "id": "yash",
+      "playerName": "Yash",
+      "game": "Total Combined Score",
+      "score": 524
+    },
+    {
+      "id": "riya",
+      "playerName": "Riya",
+      "game": "Total Combined Score",
+      "score": 524
+    },
+    {
+      "id": "vikas",
+      "playerName": "Vikas",
+      "game": "Total Combined Score",
+      "score": 524
+    },
+    {
+      "id": "rohan",
+      "playerName": "Rohan",
+      "game": "Total Combined Score",
+      "score": 520
+    },
+    {
+      "id": "shubham",
+      "playerName": "Shubham",
+      "game": "Total Combined Score",
+      "score": 498
+    },
+    {
+      "id": "raj",
+      "playerName": "Raj",
+      "game": "Total Combined Score",
+      "score": 498
+    },
+    {
+      "id": "vinay",
+      "playerName": "Vinay",
+      "game": "Total Combined Score",
+      "score": 484
+    },
+    {
+      "id": "kartikey",
+      "playerName": "Kartikey",
+      "game": "Total Combined Score",
+      "score": 482
+    },
+    {
+      "id": "kabir",
+      "playerName": "Kabir",
+      "game": "Total Combined Score",
+      "score": 431
+    },
+    {
+      "id": "zoya",
+      "playerName": "Zoya",
+      "game": "Total Combined Score",
+      "score": 431
+    },
+    {
+      "id": "om",
+      "playerName": "Om",
+      "game": "Total Combined Score",
+      "score": 412
+    },
+    {
+      "id": "dev",
+      "playerName": "Dev",
+      "game": "Total Combined Score",
+      "score": 412
+    },
+    {
+      "id": "reyaan",
+      "playerName": "Reyaan",
+      "game": "Total Combined Score",
+      "score": 412
+    },
+    {
+      "id": "advik",
+      "playerName": "Advik",
+      "game": "Total Combined Score",
+      "score": 401
+    },
+    {
+      "id": "naman",
+      "playerName": "Naman",
+      "game": "Total Combined Score",
+      "score": 397
+    },
+    {
+      "id": "ananya",
+      "playerName": "Ananya",
+      "game": "Total Combined Score",
+      "score": 395
+    },
+    {
+      "id": "kiara",
+      "playerName": "Kiara",
+      "game": "Total Combined Score",
+      "score": 395
+    },
+    {
+      "id": "harsh",
+      "playerName": "Harsh",
+      "game": "Total Combined Score",
+      "score": 395
+    },
+    {
+      "id": "mnsv0nd0qb5oz",
+      "playerName": "Sojal",
+      "game": "Total Combined Score",
+      "score": 394
+    },
+    {
+      "id": "arjun",
+      "playerName": "Arjun",
+      "game": "Total Combined Score",
+      "score": 393
+    },
+    {
+      "id": "vinod",
+      "playerName": "Vinod",
+      "game": "Total Combined Score",
+      "score": 393
+    },
+    {
+      "id": "sai",
+      "playerName": "Sai",
+      "game": "Total Combined Score",
+      "score": 390
+    },
+    {
+      "id": "sanjay",
+      "playerName": "Sanjay",
+      "game": "Total Combined Score",
+      "score": 390
+    },
+    {
+      "id": "gaurav",
+      "playerName": "Gaurav",
+      "game": "Total Combined Score",
+      "score": 390
+    },
+    {
+      "id": "pradeep",
+      "playerName": "Pradeep",
+      "game": "Total Combined Score",
+      "score": 390
+    },
+    {
+      "id": "aman",
+      "playerName": "Aman",
+      "game": "Total Combined Score",
+      "score": 385
+    },
+    {
+      "id": "aaryan",
+      "playerName": "Aaryan",
+      "game": "Total Combined Score",
+      "score": 379
+    },
+    {
+      "id": "ayush",
+      "playerName": "Ayush",
+      "game": "Total Combined Score",
+      "score": 378
+    },
+    {
+      "id": "vihaan",
+      "playerName": "Vihaan",
+      "game": "Total Combined Score",
+      "score": 378
+    },
+    {
+      "id": "vedant",
+      "playerName": "Vedant",
+      "game": "Total Combined Score",
+      "score": 372
+    },
+    {
+      "id": "praveen",
+      "playerName": "Praveen",
+      "game": "Total Combined Score",
+      "score": 332
+    },
+    {
+      "id": "vivek",
+      "playerName": "Vivek",
+      "game": "Total Combined Score",
+      "score": 323
+    },
+    {
+      "id": "kapil",
+      "playerName": "Kapil",
+      "game": "Total Combined Score",
+      "score": 317
+    },
+    {
+      "id": "sumit",
+      "playerName": "Sumit",
+      "game": "Total Combined Score",
+      "score": 314
+    },
+    {
+      "id": "manish",
+      "playerName": "Manish",
+      "game": "Total Combined Score",
+      "score": 309
+    },
+    {
+      "id": "krishna",
+      "playerName": "Krishna",
+      "game": "Total Combined Score",
+      "score": 308
+    },
+    {
+      "id": "shaurya",
+      "playerName": "Shaurya",
+      "game": "Total Combined Score",
+      "score": 308
+    },
+    {
+      "id": "aarav",
+      "playerName": "Aarav",
+      "game": "Total Combined Score",
+      "score": 306
+    },
+    {
+      "id": "diya",
+      "playerName": "Diya",
+      "game": "Total Combined Score",
+      "score": 304
+    },
+    {
+      "id": "deepak",
+      "playerName": "Deepak",
+      "game": "Total Combined Score",
+      "score": 303
+    },
+    {
+      "id": "amit",
+      "playerName": "Amit",
+      "game": "Total Combined Score",
+      "score": 302
+    },
+    {
+      "id": "sahil",
+      "playerName": "Sahil",
+      "game": "Total Combined Score",
+      "score": 300
+    },
+    {
+      "id": "ravi",
+      "playerName": "Ravi",
+      "game": "Total Combined Score",
+      "score": 298
+    },
+    {
+      "id": "sachin",
+      "playerName": "Sachin",
+      "game": "Total Combined Score",
+      "score": 292
+    },
+    {
+      "id": "nakul",
+      "playerName": "Nakul",
+      "game": "Total Combined Score",
+      "score": 292
+    },
+    {
+      "id": "tarun",
+      "playerName": "Tarun",
+      "game": "Total Combined Score",
+      "score": 287
+    },
+    {
+      "id": "sunil",
+      "playerName": "Sunil",
+      "game": "Total Combined Score",
+      "score": 287
+    },
+    {
+      "id": "ishaan",
+      "playerName": "Ishaan",
+      "game": "Total Combined Score",
+      "score": 285
+    },
+    {
+      "id": "vijay",
+      "playerName": "Vijay",
+      "game": "Total Combined Score",
+      "score": 285
+    },
+    {
+      "id": "anil",
+      "playerName": "Anil",
+      "game": "Total Combined Score",
+      "score": 283
+    },
+    {
+      "id": "samir",
+      "playerName": "Samir",
+      "game": "Total Combined Score",
+      "score": 281
+    },
+    {
+      "id": "ajay",
+      "playerName": "Ajay",
+      "game": "Total Combined Score",
+      "score": 281
+    },
+    {
+      "id": "mnty68cwzrgl5",
+      "playerName": "Anuj",
+      "game": "Total Combined Score",
+      "score": 258
+    },
+    {
+      "id": "ankit",
+      "playerName": "Ankit",
+      "game": "Total Combined Score",
+      "score": 220
+    },
+    {
+      "id": "atharv",
+      "playerName": "Atharv",
+      "game": "Total Combined Score",
+      "score": 211
+    },
+    {
+      "id": "sourabh",
+      "playerName": "Sourabh",
+      "game": "Total Combined Score",
+      "score": 209
+    },
+    {
+      "id": "rudra",
+      "playerName": "Rudra",
+      "game": "Total Combined Score",
+      "score": 201
+    },
+    {
+      "id": "mnu5bxcdf8zpv",
+      "playerName": "vishesh",
+      "game": "Total Combined Score",
+      "score": 199
+    },
+    {
+      "id": "mnu5e023m7m0j",
+      "playerName": "dhawal",
+      "game": "Total Combined Score",
+      "score": 199
+    },
+    {
+      "id": "mnu5d2nucb8pw",
+      "playerName": "krishna",
+      "game": "Total Combined Score",
+      "score": 195
+    },
+    {
+      "id": "mnu54xvmzogzf",
+      "playerName": "rohan",
+      "game": "Total Combined Score",
+      "score": 194
+    },
+    {
+      "id": "mnu5azi7739e0",
+      "playerName": "Anchal",
+      "game": "Total Combined Score",
+      "score": 194
+    },
+    {
+      "id": "mnu5fav3ev4tw",
+      "playerName": "ashit",
+      "game": "Total Combined Score",
+      "score": 194
+    },
+    {
+      "id": "mnu5j4sd0qhxu",
+      "playerName": "sanjay",
+      "game": "Total Combined Score",
+      "score": 194
+    },
+    {
+      "id": "mnu5gjphk2j15",
+      "playerName": "priyanshu_",
+      "game": "Total Combined Score",
+      "score": 192
+    },
+    {
+      "id": "mnu5hxngps1au",
+      "playerName": "ankur",
+      "game": "Total Combined Score",
+      "score": 192
+    },
+    {
+      "id": "mnu50lg2vzm9n",
+      "playerName": "Herobrine",
+      "game": "Total Combined Score",
+      "score": 191
+    },
+    {
+      "id": "rishabh",
+      "playerName": "Rishabh",
+      "game": "Total Combined Score",
+      "score": 190
+    },
+    {
+      "id": "mnu56qneww2zz",
+      "playerName": "Aryan",
+      "game": "Total Combined Score",
+      "score": 188
+    },
+    {
+      "id": "dhruv",
+      "playerName": "Dhruv",
+      "game": "Total Combined Score",
+      "score": 186
+    },
+    {
+      "id": "nitin",
+      "playerName": "Nitin",
+      "game": "Total Combined Score",
+      "score": 186
+    },
+    {
+      "id": "rahul",
+      "playerName": "Rahul",
+      "game": "Total Combined Score",
+      "score": 184
+    },
+    {
+      "id": "myra",
+      "playerName": "Myra",
+      "game": "Total Combined Score",
+      "score": 180
+    },
+    {
+      "id": "ansh",
+      "playerName": "Ansh",
+      "game": "Total Combined Score",
+      "score": 180
+    },
+    {
+      "id": "mntztece4veyj",
+      "playerName": "Priyanshu",
+      "game": "Total Combined Score",
+      "score": 158
+    },
+    {
+      "id": "karan",
+      "playerName": "Karan",
+      "game": "Total Combined Score",
+      "score": 93
+    },
+    {
+      "id": "pranav",
+      "playerName": "Pranav",
+      "game": "Total Combined Score",
+      "score": 91
+    },
+    {
+      "id": "mnsvovy6pzqdv",
+      "playerName": "abc",
+      "game": "Total Combined Score",
+      "score": 0
+    },
+    {
+      "id": "mnswqwxk5u70x",
+      "playerName": "Billu",
+      "game": "Total Combined Score",
+      "score": 0
+    },
+    {
+      "id": "mnsxfbrk2g66m",
+      "playerName": "Simon Singh",
+      "game": "Total Combined Score",
+      "score": 0
+    },
+    {
+      "id": "mnt21az6fxwwg",
+      "playerName": "Ayush",
+      "game": "Total Combined Score",
+      "score": 0
+    },
+    {
+      "id": "mnt3p0vyf5af9",
+      "playerName": "Prish",
+      "game": "Total Combined Score",
+      "score": 0
+    },
+    {
+      "id": "mntycczqpcilz",
+      "playerName": "Vaibhav",
+      "game": "Total Combined Score",
+      "score": 0
+    },
+    {
+      "id": "mntydgrm8nsd7",
+      "playerName": "Vikas",
+      "game": "Total Combined Score",
+      "score": 0
+    },
+    {
+      "id": "mntz6yi53mama",
+      "playerName": "SHIVANSH",
+      "game": "Total Combined Score",
+      "score": 0
+    },
+    {
+      "id": "mnu0s2e45z48c",
+      "playerName": "Kartikey",
+      "game": "Total Combined Score",
+      "score": 0
+    },
+    {
+      "id": "mnu585cvwnq86",
+      "playerName": "Aditya",
+      "game": "Total Combined Score",
+      "score": 0
+    },
+    {
+      "id": "aditya",
+      "playerName": "Aditya",
+      "game": "Total Combined Score",
+      "score": 0
+    },
+    {
+      "id": "armaan",
+      "playerName": "Armaan",
+      "game": "Total Combined Score",
+      "score": 0
+    },
+    {
+      "id": "mnuaay16vhih8",
+      "playerName": "Shash@0810",
+      "game": "Total Combined Score",
+      "score": 0
+    },
+    {
+      "id": "mnuba15ior98c",
+      "playerName": "Sahil Jaswal",
+      "game": "Total Combined Score",
+      "score": 0
+    }
+  ]
+}
